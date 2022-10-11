@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    #canvas {
+      display: block;
+      margin: 10px auto 0;
+      border: 1px solid orangered;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canvas" width="600" height="400">你的浏览器不支持canvas</canvas>
+  <script>
+    /** @type {HTMLCanvasElement} */
+    const canvas = document.querySelector('#canvas')
+    const ctx = canvas.getContext('2d')
+
+    const getDeviceRetio = () => {
+      return window.devicePixelRatio || 1
+    }
+    const ratio = getDeviceRetio()
+    const oldWidth = canvas.width
+    const oldHeight = canvas.height
+    canvas.width = oldWidth * ratio
+    canvas.height = oldHeight * ratio
+    canvas.style.width = oldWidth + 'px'
+    canvas.style.height = oldHeight + 'px'
+    ctx.scale(ratio, ratio)
+
+    const ht = canvas.clientHeight
+    const wd = canvas.clientWidth
+    const pad = 20 // 上下padding
+    const step = 100 // 每个刻度大小
+
+
+    // 圆环数据
+    let count = 40 // 实际数据
+    let allCount = 100 // 总数量
+    let currentCount = 0 // 动画已经进行到的位置
+    let endAngle = 0 // 角度
+
+    // 动画函数
+    function tick () {
+      requestAnimationFrame(tick)
+      if (currentCount < count) {
+        ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight)
+        currentCount = currentCount + 1 > count ? count : currentCount + 1
+        endAngle = (currentCount / allCount) * Math.PI * 2
+        circle()
+      } else {
+        window.cancelAnimationFrame(tick)
+      }
+    }
+    tick()
+
+    function circle () {
+      // 背景圆环
+      ctx.beginPath()
+      ctx.lineWidth = 20
+      // xyr 内外圆
+      let grd = ctx.createRadialGradient(100, 100, 50, 100, 100, 70)
+      grd.addColorStop(0, '#e9eae9')
+      grd.addColorStop('0.5', '#fefefe')
+      grd.addColorStop('1', '#e9eae9')
+      ctx.strokeStyle = grd
+      ctx.arc(100, 100, 60, 0, Math.PI * 2)
+      ctx.stroke()
+      ctx.closePath()
+      // 进度环
+      ctx.beginPath()
+      ctx.lineWidth = 20
+      let linear = ctx.createLinearGradient(50, 100, 150, 100)
+      linear.addColorStop(0, '#ffc26b')
+      linear.addColorStop(0.5, '#ff9a5f')
+      linear.addColorStop(1, '#ff8157')
+      ctx.strokeStyle = linear
+      ctx.arc(100, 100, 60, 0, endAngle)
+      ctx.stroke()
+      ctx.closePath()
+      // 起点圆形
+      ctx.beginPath()
+      ctx.fillStyle = '#ff8157'
+      ctx.arc(160, 100, 10, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.closePath()
+      // 终点圆形
+      ctx.beginPath()
+      ctx.lineWidth = 5
+      ctx.fillStyle = '#ffffff'
+      ctx.strokeStyle = 'ffc26b'
+      // 利用三角函数  通过半径和角度 来计算终点的坐标
+      ctx.arc(Math.cos(endAngle) * 60 + 100, Math.sin(endAngle) * 60 + 100, 10, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.stroke()
+      ctx.closePath()
+    }
+
+  </script>
+</body>
+
+</html>
